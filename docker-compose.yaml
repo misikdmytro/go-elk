@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    labels:
+      co.elastic.logs/enabled: true
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.6.1
@@ -17,6 +19,8 @@ services:
       - 9200:9200
       - 9300:9300
     restart: unless-stopped
+    labels:
+      co.elastic.logs/enabled: false
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.6.1
@@ -27,6 +31,8 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    labels:
+      co.elastic.logs/enabled: false
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.6.1
@@ -37,9 +43,12 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    labels:
+      co.elastic.logs/enabled: false
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.6.1
+    user: root
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -48,6 +57,8 @@ services:
       - logstash
     command: filebeat -e -strict.perms=false
     restart: unless-stopped
+    labels:
+      co.elastic.logs/enabled: false
 
 volumes:
   elasticsearch:
